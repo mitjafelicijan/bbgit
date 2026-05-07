@@ -1,0 +1,7 @@
+<nav class="nav-main">
+	<a href="/">Repositories</a>
+	{{if .Repo}}
+	<span>»</span>
+	<div><span class="text-bold">{{.Repo.Name}}</span>: {{.Repo.Description}}</div>
+	{{end}}
+</nav>

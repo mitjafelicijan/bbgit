@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{{.Repo.Name}} - License</title>
+		<link rel="stylesheet" href="/static/style.css">
+		<link rel="shortcut icon" href="/static/favicon.png">
+	</head>
+	<body>
+		{{template "nav-main.html" .}}
+
+		<main>
+			{{template "nav-repository.html" .}}
+
+			<div class="readme-content">
+				{{.Content}}
+			</div>
+		</main>
+
+		{{template "footer.html" .}}
+	</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{{.Repo.Name}} - {{.Path}}</title>
+		<link rel="stylesheet" href="/static/style.css">
+		<link rel="shortcut icon" href="/static/favicon.png">
+	</head>
+	<body>
+		{{template "nav-main.html" .}}
+
+		<main>
+			{{template "nav-repository.html" .}}
+
+			<div class="breadcrumbs">
+				<span>Path:</span>
+				<a href="/r/{{.Repo.Name}}/tree/?ref={{.CurrentRef}}">{{.Repo.Name}}</a>
+				{{$parts := split .Path "/"}}
+				{{$path := ""}}
+				{{range $i, $part := $parts}}
+					/
+					{{$path = join $path $part}}
+					{{if eq (add $i 1) (len $parts)}}
+						{{$part}}
+						(<a href="/r/{{$.Repo.Name}}/raw/{{$.Path}}?ref={{$.CurrentRef}}">raw</a>)
+					{{else}}
+						<a href="/r/{{$.Repo.Name}}/tree/{{$path}}?ref={{$.CurrentRef}}">{{$part}}</a>
+					{{end}}
+				{{end}}
+			</div>
+
+			<div class="blob-content">
+				<div class="code-view">{{.Content}}</div>
+			</div>
+		</main>
+
+		{{template "footer.html" .}}
+	</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{{.Repo.Name}} - Commits</title>
+		<link rel="stylesheet" href="/static/style.css">
+		<link rel="shortcut icon" href="/static/favicon.png">
+		<link rel="alternate" type="application/rss+xml" title="{{.Repo.Name}} Commits RSS" href="/r/{{.Repo.Name}}/commits.rss?ref={{.CurrentRef}}">
+		<link rel="alternate" type="application/rss+xml" title="{{.Repo.Name}} Tags RSS" href="/r/{{.Repo.Name}}/tags.rss">
+	</head>
+	<body>
+		{{template "nav-main.html" .}}
+
+		<main>
+			{{template "nav-repository.html" .}}
+
+			{{if .Languages}}
+			<div class="repository-languages">
+				<div class="language-bar">
+					<svg width="100%" height="8" style="display: block;">
+						<rect width="100%" height="8" fill="#eee" rx="4" ry="4" />
+						{{range .Languages}}
+						<rect x="{{printf "%.2f" .Offset}}%" y="0" width="{{printf "%.2f" .Percentage}}%" height="8" fill="{{.Color}}" />
+						{{end}}
+					</svg>
+				</div>
+				<ul class="language-list">
+					{{range .Languages}}
+					<li>
+						<span class="language-color" style="background-color: {{.Color}}"></span>
+						<span class="language-name">{{.Name}}</span>
+						<span class="language-percentage">{{printf "%.1f" .Percentage}}%</span>
+					</li>
+					{{end}}
+				</ul>
+			</div>
+			{{end}}
+
+			<table>
+				<thead>
+					<tr>
+						<th width="110">Date</th>
+						<th>Commit message</th>
+						<th width="200">Author</th>
+						<th width="90" class="text-right">Lines</th>
+					</tr>
+				</thead>
+				<tbody>
+					{{range .Commits}}
+					<tr>
+						<td>{{.AuthorDate.Format "2006-01-02"}}</td>
+						<td><a href="/r/{{$.Repo.Name}}/c/{{.Hash}}">{{truncate .Message 80}}</a></td>
+						<td>{{.AuthorName}}</td>
+						<td class="text-right">
+							<span class="stats-add">+{{.Additions}}</span>/<span class="stats-del">-{{.Deletions}}</span>
+						</td>
+					</tr>
+					{{else}}
+					<tr>
+						<td colspan="4">No commits found.</td>
+					</tr>
+					{{end}}
+				</tbody>
+			</table>
+
+			{{if gt .TotalPages 1}}
+			<div class="pagination">
+				{{if gt .PrevPage 0}}
+				<a href="?ref={{.CurrentRef}}&page={{.PrevPage}}">Newer</a>
+				{{else}}
+				<span class="disabled">Newer</span>
+				{{end}}
+
+				{{range .Pages}}
+					{{if eq . $.Page}}
+					<span class="current">{{.}}</span>
+					{{else}}
+					<a href="?ref={{$.CurrentRef}}&page={{.}}">{{.}}</a>
+					{{end}}
+				{{end}}
+
+				{{if gt .NextPage 0}}
+				<a href="?ref={{.CurrentRef}}&page={{.NextPage}}">Older</a>
+				{{else}}
+				<span class="disabled">Older</span>
+				{{end}}
+			</div>
+			{{end}}
+		</main>
+
+		{{template "footer.html" .}}
+	</body>
+</html>

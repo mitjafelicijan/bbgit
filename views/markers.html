@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{{.Repo.Name}} - Markers</title>
+		<link rel="stylesheet" href="/static/style.css">
+		<link rel="shortcut icon" href="/static/favicon.png">
+	</head>
+	<body>
+		{{template "nav-main.html" .}}
+
+		<main>
+			{{template "nav-repository.html" .}}
+
+			<table>
+				<thead>
+					<tr>
+						<th>type</th>
+						<th>location</th>
+						<th>content</th>
+					</tr>
+				</thead>
+				<tbody>
+					{{range .Markers}}
+					<tr>
+						<td class="text-lowercase">{{.Type}}</td>
+						<td><a href="/r/{{$.Repo.Name}}/blob/{{.FilePath}}?ref={{$.CurrentRef}}#L{{.Line}}">{{.FilePath}}:{{.Line}}</a></td>
+						<td><pre>{{.Content}}</pre></td>
+					</tr>
+					{{else}}
+					<tr>
+						<td colspan="3">No todo or fixme markers found in the repository.</td>
+					</tr>
+					{{end}}
+				</tbody>
+			</table>
+		</main>
+
+		{{template "footer.html" .}}
+	</body>
+</html>

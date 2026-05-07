@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Commit {{printf "%.7s" .Commit.Hash}} - {{.Repo.Name}}</title>
+		<link rel="stylesheet" href="/static/style.css">
+		<link rel="shortcut icon" href="/static/favicon.png">
+	</head>
+	<body>
+		{{template "nav-main.html" .}}
+
+		<main>
+			{{template "nav-repository.html" .}}
+	
+			<div>
+				{{$lines := split .Commit.Message "\n"}}
+				<h3 class="margin-none padding-none">{{index $lines 0}}</h3>
+				{{$hasBody := false}}{{range $i, $line := $lines}}{{if and (gt $i 0) (ne $line "")}}{{$hasBody = true}}{{end}}{{end}}
+				{{if $hasBody}}
+				<p>
+				{{range $i, $line := $lines}}{{if and (gt $i 0) (ne $line "")}}
+					{{$line}}<br>
+				{{end}}{{end}}
+				</p>
+				{{end}}
+			</div>
+
+			<table class="commit-info">
+				<tr>
+					<td>Author</td>
+					<td>{{.Commit.AuthorName}} &lt;{{.Commit.AuthorEmail}}&gt;</td>
+					<td>{{.Commit.AuthorDate.Format "2006-01-02 15:04:05 -0700"}}</td>
+				</tr>
+				<tr>
+					<td>Committer</td>
+					<td>{{.Commit.CommitterName}} &lt;{{.Commit.CommitterEmail}}&gt;</td>
+					<td>{{.Commit.CommitterDate.Format "2006-01-02 15:04:05 -0700"}}</td>
+				</tr>
+				<tr>
+					<td>Commit</td>
+					<td colspan="2"><code>{{.Commit.Hash}}</code> (<a href="/r/{{$.Repo.Name}}/c/{{.Commit.Hash}}/patch">patch</a>)</td>
+				</tr>
+			</table>
+
+			<div class="diffstat">
+				<table class="diffstat-table">
+					{{range .FileDiffs}}
+					<tr>
+						<td width="100" class=""><code>{{.Mode}}</code></td>
+						<td>
+							{{if .Deleted}}
+							<a href="#diff-{{.Name}}">{{.Name}}</a>
+							{{else}}
+							<a href="/r/{{$.Repo.Name}}/blob/{{.Name}}?ref={{$.Commit.Hash}}">{{.Name}}</a>
+							{{end}}
+						</td>
+						<td>
+							{{if .IsBinary}} bin {{humanize .OldSize}} -> {{humanize .NewSize}} {{else}} {{add .Addition .Deletion}} {{end}}
+						</td>
+						<td class="bar">
+							<a href="#diff-{{.Name}}" style="text-decoration: none;">
+								{{if not .IsBinary}}
+								<svg width="200" height="12">
+									{{$total := add .Addition .Deletion}}
+									{{if gt $total 0}}
+									{{$max := $.MaxChanges}}
+									{{if eq $max 0}}{{$max = 1}}{{end}}
+									{{$scaledTotal := multiply (divide (float64 $total) (float64 $max)) 200.0}}
+									{{$addWidth := multiply (divide (float64 .Addition) (float64 $total)) $scaledTotal}}
+									{{$delWidth := multiply (divide (float64 .Deletion) (float64 $total)) $scaledTotal}}
+									<rect x="0" y="0" width="{{$addWidth}}" height="12" fill="#2cbe4e" />
+									<rect x="{{$addWidth}}" y="0" width="{{$delWidth}}" height="12" fill="#cb2431" />
+									{{end}}
+								</svg>
+								{{end}}
+							</a>
+						</td>
+					</tr>
+					{{end}}
+				</table>
+				<div class="summary">
+					{{len .FileDiffs}} files changed, {{.Commit.Additions}} insertions, {{.Commit.Deletions}} deletions
+				</div>
+			</div>
+
+			<div class="file-diffs">
+				{{range .FileDiffs}}
+				<table class="diff-table">
+					<tr class="diff-fname">
+						<td colspan="4">
+							diff --git a/{{.Name}} b/{{.Name}}
+						</td>
+					</tr>
+					<colgroup>
+						<col style="width: 30px;">
+						<col style="width: calc(50% - 30px);">
+						<col style="width: 30px;">
+						<col style="width: calc(50% - 30px);">
+					</colgroup>
+					{{range .Lines}}
+					{{if eq .Type "gap"}}
+					<tr class="diff-gap">
+						<td colspan="4" class="text-center"><small>...</small></td>
+					</tr>
+					{{else}}
+					<tr class="diff-{{.Type}}">
+						<td class="ln">{{.LeftNo}}</td>
+						<td class="code"><pre>{{if .Left}}{{.Left}}{{else}} &nbsp;{{end}}</pre></td>
+						<td class="ln">{{.RightNo}}</td>
+						<td class="code"><pre>{{if .Right}}{{.Right}}{{else}} &nbsp;{{end}}</pre></td>
+					</tr>
+					{{end}}
+					{{end}}
+				</table>
+				{{else}}
+				<p>No changes in this commit.</p>
+				{{end}}
+			</div>
+		</main>
+
+		{{template "footer.html" .}}
+	</body>
+</html>

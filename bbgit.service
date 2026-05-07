@@ -1,0 +1,14 @@
+[Unit]
+Description=bbgit - lightweight Git web interface
+After=network.target
+
+[Service]
+Type=simple
+User=m
+Group=m
+WorkingDirectory=/home/m/Projects/bbgit
+ExecStart=/home/m/Projects/bbgit/bbgit -c /home/m/Projects/bbgit/config.yaml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

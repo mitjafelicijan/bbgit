@@ -1,0 +1,2 @@
+[build]
+include_ext = ["go", "css", "html", "js"]

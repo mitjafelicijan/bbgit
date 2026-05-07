@@ -1,0 +1,31 @@
+<div class="nav-repository">
+	<nav class="repo-nav">
+		<a href="/r/{{.Repo.Name}}?ref={{.CurrentRef}}">Commits</a>
+		<a href="/r/{{.Repo.Name}}/tree/?ref={{.CurrentRef}}">Tree</a>
+		<a href="/r/{{.Repo.Name}}/markers?ref={{.CurrentRef}}">Markers</a>
+		{{if .ReadmeName}}
+		<a href="/r/{{.Repo.Name}}/readme?ref={{.CurrentRef}}">Readme</a>
+		{{end}}
+		{{if .LicenseName}}
+		<a href="/r/{{.Repo.Name}}/license?ref={{.CurrentRef}}">License</a>
+		{{end}}
+		<a href="/r/{{.Repo.Name}}/archive/?ref={{.CurrentRef}}">Download</a>
+	</nav>
+
+	<nav class="controls">
+		<select id="branch-select" onchange="window.location.href='/r/{{.Repo.Name}}?ref=' + this.value">
+			<option disabled>-- Select Branch --</option>
+			{{range .Branches}}
+			<option value="{{.}}" {{if eq . $.CurrentRef}}selected{{end}}>{{.}}</option>
+			{{end}}
+		</select>
+		{{if .Tags}}
+		<select id="tag-select" onchange="window.location.href='/r/{{.Repo.Name}}?ref=' + this.value">
+			<option disabled>-- Select Tag --</option>
+			{{range .Tags}}
+			<option value="{{.}}" {{if eq . $.CurrentRef}}selected{{end}}>{{.}}</option>
+			{{end}}
+		</select>
+		{{end}}
+	</nav>
+</div>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Repositories</title>
+		<link rel="stylesheet" href="/static/style.css">
+		<link rel="shortcut icon" href="/static/favicon.png">
+	</head>
+	<body>
+		{{template "nav-main.html" .}}
+
+		<main>
+			<table>
+				<tbody>
+					{{range .Groups}}
+					{{if .Name}}
+					<tr class="group-header">
+						<th colspan="3">{{.Name}}</th>
+					</tr>
+					{{end}}
+					{{range .Repositories}}
+					<tr>
+						<td width="220"><a href="/r/{{.Name}}">{{.Name}}</a></td>
+						<td>{{.Description}}</td>
+						<td width="130">
+							<nav class="repo-links">
+								<a href="/r/{{.Name}}">commits</a>
+								<a href="/r/{{.Name}}/tree">tree</a>
+							</nav>
+						</td>
+					</tr>
+					{{end}}
+					{{else}}
+					<tr>
+						<td colspan="3">No repositories found.</td>
+					</tr>
+					{{end}}
+				</tbody>
+			</table>
+		</main>
+
+		{{template "footer.html" .}}
+	</body>
+</html>
