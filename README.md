@@ -55,6 +55,19 @@ The `config.yaml` file defines the repositories served by `bbgit`:
    sudo systemctl enable --now bbgit
    ```
 
+## Reverse Proxy (Nginx)
+
+To serve `bbgit` behind Nginx, add the following to your server block:
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
 ## Technical Details
 
 - **Language**: Go 1.22+
