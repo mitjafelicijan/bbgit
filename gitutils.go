@@ -157,7 +157,6 @@ func getRepoContext(w http.ResponseWriter, r *http.Request) (*RepoContext, error
 		hash = *h
 	}
 
-	// Cache keys
 	metadataKey := name + ":" + hash.String()
 
 	if val, ok := repoMetadataCache.Load(metadataKey); ok {
@@ -227,7 +226,7 @@ func getRepoContext(w http.ResponseWriter, r *http.Request) (*RepoContext, error
 		}
 	}
 
-	// Note: totalCommits will be updated in repoHandler if needed, 
+	// Note: totalCommits will be updated in repoHandler if needed,
 	// for now we store what we have.
 	repoMetadataCache.Store(metadataKey, RepoMetadata{
 		Branches:    branches,

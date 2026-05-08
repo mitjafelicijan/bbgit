@@ -254,10 +254,12 @@ blockquote {
 
 	.markdown-alert {
 		padding: 0.75rem 1rem;
-		margin-bottom: 1rem;
 		color: inherit;
 		border: 1px solid;
 		border-left: 0.25em solid;
+
+		margin-block-start: 1em;
+		margin-block-end: 1em;
 
 		.markdown-alert-title {
 			display: flex;

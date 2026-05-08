@@ -65,7 +65,7 @@ type alertTransformer struct{}
 
 func (a *alertTransformer) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
 	source := reader.Source()
-	
+
 	type matchInfo struct {
 		container ast.Node
 		para      *ast.Paragraph
@@ -99,7 +99,6 @@ func (a *alertTransformer) Transform(node *ast.Document, reader text.Reader, pc 
 			return ast.WalkContinue, nil
 		}
 
-		// Check paragraph text directly using p.Text(source)
 		pText := p.Text(source)
 		raw := string(pText)
 		trimmed := strings.TrimLeft(raw, " \t\n\r")

@@ -24,7 +24,6 @@ type RepoMetadata struct {
 
 const CurrentMetadataVersion = 1
 
-
 type LangCacheKey struct {
 	RepoName   string
 	CommitHash string

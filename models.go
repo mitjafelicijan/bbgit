@@ -1,8 +1,8 @@
 package main
 
 import (
-	"time"
 	"encoding/xml"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
