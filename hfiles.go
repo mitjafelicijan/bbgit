@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"path"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/go-git/go-git/v5/plumbing"
@@ -115,6 +116,12 @@ func blobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	isBinary, _ := file.IsBinary()
+	if isBinary {
+		http.Redirect(w, r, fmt.Sprintf("/r/%s/raw/%s?ref=%s", ctx.Repo.Name, pathValue, ctx.CurrentRef), http.StatusFound)
+		return
+	}
+
 	content, err := file.Contents()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error reading file: %v", err), http.StatusInternalServerError)
@@ -164,8 +171,44 @@ func rawHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer reader.Close()
 
-	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", pathValue))
+	// Read first 512 bytes to detect content type
+	data := make([]byte, 512)
+	n, err := io.ReadFull(reader, data)
+	if err != nil && err != io.EOF && err != io.ErrUnexpectedEOF {
+		http.Error(w, fmt.Sprintf("Error reading file: %v", err), http.StatusInternalServerError)
+		return
+	}
+	data = data[:n]
+
+	contentType := http.DetectContentType(data)
+
+	// Fallback for some common types if DetectContentType returns octet-stream or text/plain
+	if contentType == "application/octet-stream" || contentType == "text/plain; charset=utf-8" {
+		ext := strings.ToLower(path.Ext(pathValue))
+		switch ext {
+		case ".go", ".ts", ".js", ".md", ".txt", ".json", ".yaml", ".yml", ".sh", ".c", ".h", ".cpp", ".hpp", ".css", ".html":
+			contentType = "text/plain; charset=utf-8"
+		case ".pdf":
+			contentType = "application/pdf"
+		case ".svg":
+			contentType = "image/svg+xml"
+		}
+	}
+
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Content-Length", strconv.FormatInt(file.Size, 10))
+
+	// Decide if it should be inline or attachment
+	disposition := "inline"
+	if contentType == "application/octet-stream" {
+		disposition = "attachment"
+	}
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("%s; filename=\"%s\"", disposition, path.Base(pathValue)))
+
+	// Write the first bytes we read
+	w.Write(data)
+	// Then copy the rest
 	io.Copy(w, reader)
 }
 
