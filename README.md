@@ -5,7 +5,7 @@ A Git web interface written in Go.
 ## Features
 
 - **Repository Management**: Supports multiple repositories grouped by category in `config.yaml`.
-- **Browsing**: Navigate commit history, directory trees, and file contents.
+- **Browsing**: Navigate commit history, directory files, and file contents.
 - **Syntax Highlighting**: Automatic language detection and highlighting via [Chroma](https://github.com/alecthomas/chroma).
 - **Markdown Rendering**: Renders README files with GFM support and GitHub-style alerts via [Goldmark](https://github.com/yuin/goldmark).
 - **Language Statistics**: Visual breakdown of programming languages used in each repository.
@@ -81,7 +81,7 @@ location / {
 |----------|-------------|
 | `/` | Home page with grouped repository list. |
 | `/r/{name}` | Commit history (log) for the repository. |
-| `/r/{name}/tree/{path}` | Directory tree browser. |
+| `/r/{name}/files/{path}` | Directory file browser. |
 | `/r/{name}/blob/{path}` | File viewer with syntax highlighting. |
 | `/r/{name}/raw/{path}` | Raw file download. |
 | `/r/{name}/markers` | Results of the `TODO:` and `FIXME:` scanner. |

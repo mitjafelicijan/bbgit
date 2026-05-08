@@ -68,7 +68,7 @@ func main() {
 	mux.HandleFunc("GET /r/{name}/markers", markersHandler)
 	mux.HandleFunc("GET /r/{name}/commits.rss", repoCommitsRSSHandler)
 	mux.HandleFunc("GET /r/{name}/tags.rss", repoTagsRSSHandler)
-	mux.HandleFunc("GET /r/{name}/tree/{path...}", treeHandler)
+	mux.HandleFunc("GET /r/{name}/files/{path...}", filesHandler)
 	mux.HandleFunc("GET /r/{name}/blob/{path...}", blobHandler)
 	mux.HandleFunc("GET /r/{name}/raw/{path...}", rawHandler)
 	mux.HandleFunc("GET /r/{name}/archive/{path...}", archiveHandler)

@@ -13,7 +13,7 @@
 
 			<div class="breadcrumbs">
 				<span>Path:</span>
-				<a href="/r/{{.Repo.Name}}/tree/?ref={{.CurrentRef}}">{{.Repo.Name}}</a>
+				<a href="/r/{{.Repo.Name}}/files/?ref={{.CurrentRef}}">{{.Repo.Name}}</a>
 				{{$parts := split .Path "/"}}
 				{{$path := ""}}
 				{{range $i, $part := $parts}}
@@ -23,7 +23,7 @@
 						{{$part}}
 						(<a href="/r/{{$.Repo.Name}}/raw/{{$.Path}}?ref={{$.CurrentRef}}">raw</a>)
 					{{else}}
-						<a href="/r/{{$.Repo.Name}}/tree/{{$path}}?ref={{$.CurrentRef}}">{{$part}}</a>
+						<a href="/r/{{$.Repo.Name}}/files/{{$path}}?ref={{$.CurrentRef}}">{{$part}}</a>
 					{{end}}
 				{{end}}
 			</div>

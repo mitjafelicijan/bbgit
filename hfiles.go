@@ -16,7 +16,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
-func treeHandler(w http.ResponseWriter, r *http.Request) {
+func filesHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, err := getRepoContext(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -86,10 +86,10 @@ func treeHandler(w http.ResponseWriter, r *http.Request) {
 		RepoContext: ctx,
 		Entries:     entries,
 		Path:        pathValue,
-		View:        "tree",
+		View:        "files",
 	}
 
-	err = templates.ExecuteTemplate(w, "tree.html", data)
+	err = templates.ExecuteTemplate(w, "files.html", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

@@ -1,7 +1,7 @@
 <div class="nav-repository">
 	<nav class="repo-nav">
 		<a href="/r/{{.Repo.Name}}?ref={{.CurrentRef}}">Commits</a>
-		<a href="/r/{{.Repo.Name}}/tree/?ref={{.CurrentRef}}">Tree</a>
+		<a href="/r/{{.Repo.Name}}/files/?ref={{.CurrentRef}}">Files</a>
 		<a href="/r/{{.Repo.Name}}/markers?ref={{.CurrentRef}}">Markers</a>
 		{{if .ReadmeName}}
 		<a href="/r/{{.Repo.Name}}/readme?ref={{.CurrentRef}}">Readme</a>
