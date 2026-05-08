@@ -28,10 +28,26 @@ func commitHandler(w http.ResponseWriter, r *http.Request) {
 
 	var fileDiffs []FileDiff
 	maxChanges := 0
+	totalAdds, totalDels := 0, 0
+	isCommitTooLarge := false
+
 	if commit.NumParents() > 0 {
 		parent, _ := commit.Parent(0)
 		patch, err := parent.Patch(commit)
 		if err == nil {
+			pStats := patch.Stats()
+			for _, s := range pStats {
+				totalAdds += s.Addition
+				totalDels += s.Deletion
+			}
+			isCommitTooLarge = (totalAdds + totalDels) > 5000
+
+			// Map stats by name for quick lookup
+			statsMap := make(map[string]object.FileStat)
+			for _, s := range pStats {
+				statsMap[s.Name] = s
+			}
+
 			for _, fp := range patch.FilePatches() {
 				from, to := fp.Files()
 				name := ""
@@ -44,7 +60,8 @@ func commitHandler(w http.ResponseWriter, r *http.Request) {
 					mode = formatMode(from.Mode())
 				}
 
-				fileAdd, fileDel := 0, 0
+				stat := statsMap[name]
+				fileAdd, fileDel := stat.Addition, stat.Deletion
 				isBinary := fp.IsBinary()
 				deleted := to == nil
 				var oldSize, newSize int64
@@ -64,97 +81,97 @@ func commitHandler(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 
-				var diffLines []DiffLine
-				leftNo, rightNo := 1, 1
-
-				var delLines []string
-				var addLines []string
-
-				flush := func() {
-					max := len(delLines)
-					if len(addLines) > max {
-						max = len(addLines)
-					}
-					for i := 0; i < max; i++ {
-						line := DiffLine{}
-						if i < len(delLines) && i < len(addLines) {
-							line.LeftNo = fmt.Sprintf("%d", leftNo)
-							line.Left = delLines[i]
-							line.RightNo = fmt.Sprintf("%d", rightNo)
-							line.Right = addLines[i]
-							line.Type = "mod"
-							leftNo++
-							rightNo++
-							fileAdd++
-							fileDel++
-						} else if i < len(delLines) {
-							line.LeftNo = fmt.Sprintf("%d", leftNo)
-							line.Left = delLines[i]
-							line.Type = "del"
-							leftNo++
-							fileDel++
-						} else if i < len(addLines) {
-							line.RightNo = fmt.Sprintf("%d", rightNo)
-							line.Right = addLines[i]
-							line.Type = "add"
-							rightNo++
-							fileAdd++
-						}
-						diffLines = append(diffLines, line)
-					}
-					delLines = nil
-					addLines = nil
-				}
-
-				for _, chunk := range fp.Chunks() {
-					lines := strings.Split(strings.TrimSuffix(chunk.Content(), "\n"), "\n")
-					switch chunk.Type() {
-					case diff.Equal:
-						flush()
-						for _, line := range lines {
-							diffLines = append(diffLines, DiffLine{
-								LeftNo:  fmt.Sprintf("%d", leftNo),
-								Left:    line,
-								RightNo: fmt.Sprintf("%d", rightNo),
-								Right:   line,
-								Type:    "eq",
-							})
-							leftNo++
-							rightNo++
-						}
-					case diff.Delete:
-						delLines = append(delLines, lines...)
-					case diff.Add:
-						addLines = append(addLines, lines...)
-					}
-				}
-				flush()
-
 				if fileAdd+fileDel > maxChanges {
 					maxChanges = fileAdd + fileDel
 				}
 
-				visible := make([]bool, len(diffLines))
-				for i, line := range diffLines {
-					if line.Type == "add" || line.Type == "del" || line.Type == "mod" {
-						for j := i - 3; j <= i+3; j++ {
-							if j >= 0 && j < len(diffLines) {
-								visible[j] = true
+				isFileTooLarge := (fileAdd + fileDel) > 1000
+				var filteredLines []DiffLine
+
+				if !isCommitTooLarge && !isFileTooLarge && !isBinary {
+					var diffLines []DiffLine
+					leftNo, rightNo := 1, 1
+
+					var delLines []string
+					var addLines []string
+
+					flush := func() {
+						max := len(delLines)
+						if len(addLines) > max {
+							max = len(addLines)
+						}
+						for i := 0; i < max; i++ {
+							line := DiffLine{}
+							if i < len(delLines) && i < len(addLines) {
+								line.LeftNo = fmt.Sprintf("%d", leftNo)
+								line.Left = delLines[i]
+								line.RightNo = fmt.Sprintf("%d", rightNo)
+								line.Right = addLines[i]
+								line.Type = "mod"
+								leftNo++
+								rightNo++
+							} else if i < len(delLines) {
+								line.LeftNo = fmt.Sprintf("%d", leftNo)
+								line.Left = delLines[i]
+								line.Type = "del"
+								leftNo++
+							} else if i < len(addLines) {
+								line.RightNo = fmt.Sprintf("%d", rightNo)
+								line.Right = addLines[i]
+								line.Type = "add"
+								rightNo++
+							}
+							diffLines = append(diffLines, line)
+						}
+						delLines = nil
+						addLines = nil
+					}
+
+					for _, chunk := range fp.Chunks() {
+						lines := strings.Split(strings.TrimSuffix(chunk.Content(), "\n"), "\n")
+						switch chunk.Type() {
+						case diff.Equal:
+							flush()
+							for _, line := range lines {
+								diffLines = append(diffLines, DiffLine{
+									LeftNo:  fmt.Sprintf("%d", leftNo),
+									Left:    line,
+									RightNo: fmt.Sprintf("%d", rightNo),
+									Right:   line,
+									Type:    "eq",
+								})
+								leftNo++
+								rightNo++
+							}
+						case diff.Delete:
+							delLines = append(delLines, lines...)
+						case diff.Add:
+							addLines = append(addLines, lines...)
+						}
+					}
+					flush()
+
+					visible := make([]bool, len(diffLines))
+					for i, line := range diffLines {
+						if line.Type == "add" || line.Type == "del" || line.Type == "mod" {
+							for j := i - 3; j <= i+3; j++ {
+								if j >= 0 && j < len(diffLines) {
+									visible[j] = true
+								}
 							}
 						}
 					}
-				}
 
-				var filteredLines []DiffLine
-				lastWasGap := false
-				for i, isVisible := range visible {
-					if isVisible {
-						filteredLines = append(filteredLines, diffLines[i])
-						lastWasGap = false
-					} else {
-						if !lastWasGap {
-							filteredLines = append(filteredLines, DiffLine{Type: "gap"})
-							lastWasGap = true
+					lastWasGap := false
+					for i, isVisible := range visible {
+						if isVisible {
+							filteredLines = append(filteredLines, diffLines[i])
+							lastWasGap = false
+						} else {
+							if !lastWasGap {
+								filteredLines = append(filteredLines, DiffLine{Type: "gap"})
+								lastWasGap = true
+							}
 						}
 					}
 				}
@@ -169,16 +186,13 @@ func commitHandler(w http.ResponseWriter, r *http.Request) {
 					OldSize:  oldSize,
 					NewSize:  newSize,
 					Deleted:  deleted,
+					TooLarge: isFileTooLarge,
 				})
 			}
 		}
-	}
-
-	stats, _ := commit.Stats()
-	adds, dels := 0, 0
-	for _, s := range stats {
-		adds += s.Addition
-		dels += s.Deletion
+	} else {
+		// Initial commit - no parents
+		// We could still show the whole file as additions, but the current logic handles parents only
 	}
 
 	data := struct {
@@ -197,8 +211,9 @@ func commitHandler(w http.ResponseWriter, r *http.Request) {
 			CommitterEmail: commit.Committer.Email,
 			CommitterDate:  commit.Committer.When,
 			Message:        commit.Message,
-			Additions:      adds,
-			Deletions:      dels,
+			Additions:      totalAdds,
+			Deletions:      totalDels,
+			TooLarge:       isCommitTooLarge,
 		},
 		FileDiffs:  fileDiffs,
 		MaxChanges: maxChanges,

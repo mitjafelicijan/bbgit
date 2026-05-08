@@ -83,6 +83,9 @@
 			</div>
 
 			<div class="file-diffs">
+				{{if .Commit.TooLarge}}
+				<p class="text-center padding-none margin-none"><b>Commit too large to display</b></p>
+				{{else}}
 				{{range .FileDiffs}}
 				<table class="diff-table">
 					<tr class="diff-fname">
@@ -96,6 +99,11 @@
 						<col style="width: 30px;">
 						<col style="width: calc(50% - 30px);">
 					</colgroup>
+					{{if .TooLarge}}
+					<tr class="diff-gap">
+						<td colspan="4" class="text-center"><b>Changes too big to display</b></td>
+					</tr>
+					{{else}}
 					{{range .Lines}}
 					{{if eq .Type "gap"}}
 					<tr class="diff-gap">
@@ -110,9 +118,11 @@
 					</tr>
 					{{end}}
 					{{end}}
+					{{end}}
 				</table>
 				{{else}}
 				<p>No changes in this commit.</p>
+				{{end}}
 				{{end}}
 			</div>
 		</main>

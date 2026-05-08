@@ -26,6 +26,7 @@ type Commit struct {
 	Message        string
 	Additions      int
 	Deletions      int
+	TooLarge       bool
 }
 
 type DiffLine struct {
@@ -46,6 +47,7 @@ type FileDiff struct {
 	OldSize  int64
 	NewSize  int64
 	Deleted  bool
+	TooLarge bool
 }
 
 type GroupedRepositories struct {
