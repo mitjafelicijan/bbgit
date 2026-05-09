@@ -81,14 +81,10 @@ a:hover {
 	text-decoration: underline;
 }
 
-pre { 
-	margin: 0; 
-	overflow-x: auto; 
-	scrollbar-width: none;
+pre {
+	margin: 0;
+	overflow-x: auto;
 	white-space: pre;
-}
-pre::-webkit-scrollbar { 
-	display: none;
 }
 
 blockquote {
@@ -128,7 +124,20 @@ blockquote {
 
 .nav-main {
 	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.nav-main-left {
+	display: flex;
 	gap: 0.4em;
+	align-items: center;
+}
+
+.nav-main-right {
+	display: flex;
+	gap: 1em;
+	font-size: small;
 }
 
 .nav-repository {
@@ -141,17 +150,96 @@ blockquote {
 	}
 }
 
-.code-view {
-	border: 1px solid var(--border);
+.content-layout {
+	display: flex;
+	gap: 1em;
+	min-width: 0;
+	align-items: flex-start;
 }
 
-.diff-table { 
-	table-layout: fixed;
+.tree-view {
+	width: 250px;
+	flex-shrink: 0;
+	border: 1px solid var(--border);
+	font-size: small;
+	padding: 0.5em 0;
+	align-self: flex-start;
+}
+
+.tree-entry {
+	display: block;
+	padding: 2px 10px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: #000000;
+	text-decoration: none;
+}
+
+.tree-entry:hover {
+	background: var(--table-row-hover-bg);
+	text-decoration: none;
+}
+
+.tree-entry.active {
+	font-weight: bold;
+	background: var(--bg);
+	color: var(--link);
+}
+
+.tree-entry.directory {
+	color: #000000;
+}
+
+.code-container {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--border);
+	min-width: 0;
+}
+
+.code-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.5em 1em;
+	background: var(--table-header-bg);
+	border-bottom: 1px solid var(--border);
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	font-size: small;
+	font-family: monospace;
+}
+
+.code-view {
+	border: none;
+}
+
+.code-view pre { background: none !important; }
+
+.code-view code > span > span:first-child {
+	color: var(--ln-fg);
+	background: var(--ln-bg);
+	border-right: 1px solid var(--border);
+	font-size: smaller;
+}
+
+.files-view {
+	flex-grow: 1;
+	overflow: auto;
+	min-width: 0;
+
+	a { color: initial; }
+}
+
+.diff-table {
 	width: 100%;
 	border-collapse: collapse;
 	font-family: monospace;
 
-	td { 
+	td {
 		padding: 0 2px;
 		border: 0;
 		overflow: hidden;
@@ -182,13 +270,13 @@ blockquote {
 	.diff-add { background-color: var(--diff-add-bg); color: var(--diff-add-fg); }
 	.diff-del { background-color: var(--diff-del-bg); color: var(--diff-del-fg); }
 	.diff-mod { background-color: var(--diff-mod-bg); color: var(--diff-mod-fg); }
-	.diff-gap { 
+	.diff-gap {
 		background-color: var(--diff-gap-bg);
 		color: var(--diff-gap-fg);
 		border-top: 1px solid var(--border);
 		border-bottom: 1px solid var(--border);
 	}
-	.diff-fname { 
+	.diff-fname {
 		background-color: var(--diff-fname-bg);
 		color: var(--diff-fname-fg);
 		border-top: 1px solid var(--border);
@@ -197,6 +285,31 @@ blockquote {
 		font-size: smaller;
 		font-weight: bold;
 	}
+}
+
+.tree-view details summary {
+	list-style: none;
+	cursor: pointer;
+	outline: none;
+}
+
+.tree-view details summary::-webkit-details-marker {
+	display: none;
+}
+
+.tree-view details summary::before {
+	content: "▸";
+	display: inline-block;
+	width: 1em;
+	color: #000000;
+}
+
+.tree-view details[open] > summary::before {
+	content: "▾";
+}
+
+.tree-view details {
+	display: block;
 }
 
 .file-diffs {
@@ -223,16 +336,6 @@ blockquote {
 		color: var(--fg-muted);
 		font-size: small;
 		user-select: none;
-	}
-}
-
-.code-view {
-	pre { background: none !important; }
-	code > span > span:first-child {
-		color: var(--ln-fg);
-		background: var(--ln-bg);
-		border-right: 1px solid var(--border);
-		font-size: smaller;
 	}
 }
 
@@ -367,16 +470,10 @@ blockquote {
 	color: var(--fg-muted);
 }
 
-footer {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
+.footer {
+	margin-top: 2em;
+	padding-top: 1em;
+	text-align: center;
 	color: var(--fg-muted);
 	font-size: small;
-
-	.footer-rss {
-		display: flex;
-		gap: 1em;
-	}
 }
-

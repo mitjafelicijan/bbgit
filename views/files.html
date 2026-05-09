@@ -11,63 +11,50 @@
 		<main>
 			{{template "nav-repository.html" .}}
 
-			<div class="breadcrumbs">
-				<span>Path:</span>
-				{{if .Path}}
-					<a href="/r/{{.Repo.Name}}/files/?ref={{.CurrentRef}}">{{.Repo.Name}}</a>
-					{{$parts := split .Path "/"}}
-					{{$path := ""}}
-					{{range $i, $part := $parts}}
-						/
-						{{$path = join $path $part}}
-						{{if eq (add $i 1) (len $parts)}}
-							{{$part}}
-							(<a href="/r/{{$.Repo.Name}}/archive/{{$.Path}}?ref={{$.CurrentRef}}">download</a>)
-						{{else}}
-							<a href="/r/{{$.Repo.Name}}/files/{{$path}}?ref={{$.CurrentRef}}">{{$part}}</a>
-						{{end}}
-					{{end}}
-				{{else}}
-					{{.Repo.Name}}
-				{{end}}
-			</div>
+			<div class="content-layout">
+				<div class="tree-view">
+					{{template "tree" dict "Entries" .AllEntries "RepoName" .Repo.Name "CurrentRef" .CurrentRef "CurrentPath" .Path}}
+				</div>
 
-			<table>
-				<thead>
-					<tr>
-						<th width="20"></th>
-						<th>Name</th>
-						<th width="100" class="text-right">Mode</th>
-						<th width="100" class="text-right">Size</th>
-						<th width="50" class="text-center">Raw</th>
-					</tr>
-				</thead>
-				<tbody>
-					{{if .Path}}
-					<tr>
-						<td></td>
-						<td colspan="4"><a href="/r/{{.Repo.Name}}/files/{{parent .Path}}?ref={{.CurrentRef}}">..</a></td>
-					</tr>
-					{{end}}
-					{{range .Entries}}
-					<tr>
-						<td class="filetype text-center">{{if .IsDir}}d{{else}}f{{end}}</td>
-						<td>
-							{{if .IsDir}}
-							<a href="/r/{{$.Repo.Name}}/files/{{.Path}}?ref={{$.CurrentRef}}">{{.Name}}/</a>
-							{{else}}
-							<a href="/r/{{$.Repo.Name}}/blob/{{.Path}}?ref={{$.CurrentRef}}">{{.Name}}</a>
+				<div class="files-view">
+					<table>
+						<thead>
+							<tr>
+								<th width="20"></th>
+								<th>Name</th>
+								<th width="100" class="text-right">Mode</th>
+								<th width="100" class="text-right">Size</th>
+								<th width="50" class="text-center">Raw</th>
+							</tr>
+						</thead>
+						<tbody>
+							{{if .Path}}
+							<tr>
+								<td></td>
+								<td colspan="4"><a href="/r/{{.Repo.Name}}/files/{{parent .Path}}?ref={{.CurrentRef}}">..</a></td>
+							</tr>
 							{{end}}
-						</td>
-						<td class="text-right"><code>{{.Mode}}</code></td>
-						<td class="text-right">{{if not .IsDir}}<code>{{humanize .Size}}</code>{{end}}</td>
-						<td class="text-center">{{if not .IsDir}}<a href="/r/{{$.Repo.Name}}/raw/{{.Path}}?ref={{$.CurrentRef}}">raw</a>{{end}}</td>
-					</tr>
-					{{end}}
-				</tbody>
-			</table>
+							{{range .Entries}}
+							<tr>
+								<td class="filetype text-center">{{if .IsDir}}{{template "icon-directory" .}}{{else}}{{template "icon-file" .}}{{end}}</td>
+								<td>
+									{{if .IsDir}}
+									<a href="/r/{{$.Repo.Name}}/files/{{.Path}}?ref={{$.CurrentRef}}">{{.Name}}/</a>
+									{{else}}
+									<a href="/r/{{$.Repo.Name}}/blob/{{.Path}}?ref={{$.CurrentRef}}">{{.Name}}</a>
+									{{end}}
+								</td>
+								<td class="text-right"><code>{{.Mode}}</code></td>
+								<td class="text-right">{{if not .IsDir}}<code>{{humanize .Size}}</code>{{end}}</td>
+								<td class="text-center">{{if not .IsDir}}<a href="/r/{{$.Repo.Name}}/raw/{{.Path}}?ref={{$.CurrentRef}}">raw</a>{{end}}</td>
+							</tr>
+							{{end}}
+						</tbody>
+					</table>
+				</div>
+			</div>
 		</main>
-
 		{{template "footer.html" .}}
 	</body>
 </html>
+

@@ -35,7 +35,7 @@ func repoHandler(w http.ResponseWriter, r *http.Request) {
 
 	totalCommitsKey := ctx.Repo.Name + ":" + ctx.Hash.String()
 	var totalCommits int
-	if val, ok := repoMetadataCache.Load(totalCommitsKey); ok {
+	if val, ok := repoMetadataCache.Load(totalCommitsKey); ok && val.(RepoMetadata).TotalCommits > 0 {
 		totalCommits = val.(RepoMetadata).TotalCommits
 	} else {
 		cIter, err := ctx.GitRepo.Log(&git.LogOptions{From: ctx.Hash})

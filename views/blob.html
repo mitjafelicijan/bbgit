@@ -11,28 +11,20 @@
 		<main>
 			{{template "nav-repository.html" .}}
 
-			<div class="breadcrumbs">
-				<span>Path:</span>
-				<a href="/r/{{.Repo.Name}}/files/?ref={{.CurrentRef}}">{{.Repo.Name}}</a>
-				{{$parts := split .Path "/"}}
-				{{$path := ""}}
-				{{range $i, $part := $parts}}
-					/
-					{{$path = join $path $part}}
-					{{if eq (add $i 1) (len $parts)}}
-						{{$part}}
-						(<a href="/r/{{$.Repo.Name}}/raw/{{$.Path}}?ref={{$.CurrentRef}}">raw</a>)
-					{{else}}
-						<a href="/r/{{$.Repo.Name}}/files/{{$path}}?ref={{$.CurrentRef}}">{{$part}}</a>
-					{{end}}
-				{{end}}
-			</div>
-
-			<div class="blob-content">
-				<div class="code-view">{{.Content}}</div>
+			<div class="content-layout">
+				<div class="tree-view">
+					{{template "tree" dict "Entries" .AllEntries "RepoName" .Repo.Name "CurrentRef" .CurrentRef "CurrentPath" .Path}}
+				</div>
+				<div class="code-container">
+					<div class="code-header">
+						<span class="file-path">{{.Path}}</span>
+						<a href="/r/{{.Repo.Name}}/raw/{{.Path}}?ref={{.CurrentRef}}" class="raw-link">raw</a>
+					</div>
+					<div class="code-view">{{.Content}}</div>
+				</div>
 			</div>
 		</main>
-
 		{{template "footer.html" .}}
 	</body>
 </html>
+

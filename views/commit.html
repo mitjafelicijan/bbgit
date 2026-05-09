@@ -10,7 +10,6 @@
 
 		<main>
 			{{template "nav-repository.html" .}}
-	
 			<div>
 				{{$lines := split .Commit.Message "\n"}}
 				<h3 class="margin-none padding-none">{{index $lines 0}}</h3>
@@ -126,7 +125,7 @@
 				{{end}}
 			</div>
 		</main>
-
 		{{template "footer.html" .}}
 	</body>
 </html>
+

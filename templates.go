@@ -42,6 +42,9 @@ var templates = template.Must(template.New("").Funcs(template.FuncMap{
 	"float64": func(i int) float64 {
 		return float64(i)
 	},
+	"int": func(f float64) int {
+		return int(f)
+	},
 	"multiply": func(a, b float64) float64 {
 		return a * b
 	},
@@ -50,6 +53,21 @@ var templates = template.Must(template.New("").Funcs(template.FuncMap{
 			return 0
 		}
 		return a / b
+	},
+	"hasPrefix": strings.HasPrefix,
+	"dict": func(values ...interface{}) (map[string]interface{}, error) {
+		if len(values)%2 != 0 {
+			return nil, fmt.Errorf("invalid dict call")
+		}
+		dict := make(map[string]interface{}, len(values)/2)
+		for i := 0; i < len(values); i += 2 {
+			key, ok := values[i].(string)
+			if !ok {
+				return nil, fmt.Errorf("dict keys must be strings")
+			}
+			dict[key] = values[i+1]
+		}
+		return dict, nil
 	},
 	"humanize": func(size int64) string {
 		const unit = 1024

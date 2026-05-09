@@ -56,11 +56,13 @@ type GroupedRepositories struct {
 }
 
 type TreeEntry struct {
-	Name  string
-	Path  string
-	IsDir bool
-	Size  int64
-	Mode  string
+	Name     string
+	Path     string
+	IsDir    bool
+	Size     int64
+	Mode     string
+	Depth    int
+	Children []*TreeEntry
 }
 
 type RepoContext struct {

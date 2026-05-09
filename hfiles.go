@@ -45,7 +45,7 @@ func filesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var entries []TreeEntry
+	var entries []*TreeEntry
 	for _, entry := range tree.Entries {
 		fullPath := entry.Name
 		if pathValue != "" {
@@ -62,7 +62,7 @@ func filesHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		entries = append(entries, TreeEntry{
+		entries = append(entries, &TreeEntry{
 			Name:  entry.Name,
 			Path:  fullPath,
 			IsDir: isDir,
@@ -78,14 +78,22 @@ func filesHandler(w http.ResponseWriter, r *http.Request) {
 		return entries[i].Name < entries[j].Name
 	})
 
+	var allEntries []*TreeEntry
+	fullTree, err := commit.Tree()
+	if err == nil {
+		allEntries = getTreeEntries(fullTree, "", 0)
+	}
+
 	data := struct {
 		*RepoContext
-		Entries []TreeEntry
-		Path    string
-		View    string
+		Entries    []*TreeEntry
+		AllEntries []*TreeEntry
+		Path       string
+		View       string
 	}{
 		RepoContext: ctx,
 		Entries:     entries,
+		AllEntries:  allEntries,
 		Path:        pathValue,
 		View:        "files",
 	}
@@ -128,14 +136,22 @@ func blobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var allEntries []*TreeEntry
+	tree, err := commit.Tree()
+	if err == nil {
+		allEntries = getTreeEntries(tree, "", 0)
+	}
+
 	data := struct {
 		*RepoContext
-		Path    string
-		Content template.HTML
+		Path       string
+		Content    template.HTML
+		AllEntries []*TreeEntry
 	}{
 		RepoContext: ctx,
 		Path:        pathValue,
 		Content:     highlight(pathValue, content),
+		AllEntries:  allEntries,
 	}
 
 	err = templates.ExecuteTemplate(w, "blob.html", data)
@@ -279,4 +295,40 @@ func archiveHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error creating archive: %v", err)
 	}
+}
+
+func getTreeEntries(tree *object.Tree, prefix string, depth int) []*TreeEntry {
+	var entries []*TreeEntry
+	for _, entry := range tree.Entries {
+		fullPath := entry.Name
+		if prefix != "" {
+			fullPath = prefix + "/" + entry.Name
+		}
+
+		isDir := entry.Mode.IsFile() == false
+		te := &TreeEntry{
+			Name:  entry.Name,
+			Path:  fullPath,
+			IsDir: isDir,
+			Mode:  entry.Mode.String(),
+			Depth: depth,
+		}
+
+		if isDir {
+			subTree, err := tree.Tree(entry.Name)
+			if err == nil {
+				te.Children = getTreeEntries(subTree, fullPath, depth+1)
+			}
+		}
+		entries = append(entries, te)
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].IsDir != entries[j].IsDir {
+			return entries[i].IsDir
+		}
+		return entries[i].Name < entries[j].Name
+	})
+
+	return entries
 }

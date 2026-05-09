@@ -1,7 +1,15 @@
 <nav class="nav-main">
-	<a href="/">Repositories</a>
+	<div class="nav-main-left">
+		<a href="/">Repositories</a>
+		{{if .Repo}}
+		<span>»</span>
+		<div><span class="text-bold">{{.Repo.Name}}</span>: {{.Repo.Description}}</div>
+		{{end}}
+	</div>
 	{{if .Repo}}
-	<span>»</span>
-	<div><span class="text-bold">{{.Repo.Name}}</span>: {{.Repo.Description}}</div>
+	<div class="nav-main-right">
+		<a href="/r/{{.Repo.Name}}/commits.rss?ref={{.CurrentRef}}" title="Commits RSS">Commits RSS</a>
+		<a href="/r/{{.Repo.Name}}/tags.rss" title="Tags RSS">Tags RSS</a>
+	</div>
 	{{end}}
 </nav>
