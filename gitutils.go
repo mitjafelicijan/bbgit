@@ -96,6 +96,8 @@ func scanMarkers(ctx *RepoContext) ([]Marker, error) {
 			markerType := ""
 			if strings.Contains(trimmed, "TODO:") {
 				markerType = "TODO"
+			} else if strings.Contains(trimmed, "NOTE:") {
+				markerType = "NOTE"
 			} else if strings.Contains(trimmed, "FIXME:") {
 				markerType = "FIXME"
 			}
